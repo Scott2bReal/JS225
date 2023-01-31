@@ -15,6 +15,7 @@
 //   return obj;
 // }
 
+// Solution
 function makeObj() {
   return {
     propA: 10,
@@ -56,61 +57,61 @@ function makeObj() {
 
 // Your implemented function should be able to work with the code below:
 
-function createInvoice(services = {}) {
-  // implement the factory function here
-  return {
-    ...services,
-    total() {
-      const internet = this.internet ?? 3000
-      const phone = this.phone ?? 5500
-      return internet + phone
-    },
-  }
-}
-
-function invoiceTotal(invoices) {
-  let total = 0
-  let i
-
-  for (i = 0; i < invoices.length; i += 1) {
-    const invoice = invoices[i]
-    console.log(invoice)
-    console.log(invoice.total)
-    total += invoices[i].total()
-  }
-
-  return total
-}
-
-let invoices = []
-invoices.push(createInvoice())
-invoices.push(
-  createInvoice({
-    internet: 6500,
-  })
-)
-
-invoices.push(
-  createInvoice({
-    phone: 2000,
-  })
-)
-
-invoices.push(
-  createInvoice({
-    phone: 1000,
-    internet: 4500,
-  })
-)
-
-console.log(invoiceTotal(invoices)) // => 31000
+// function createInvoice(services = {}) {
+//   // implement the factory function here
+//   return {
+//     ...services,
+//     total() {
+//       const internet = this.internet ?? 3000
+//       const phone = this.phone ?? 5500
+//       return internet + phone
+//     },
+//   }
+// }
+//
+// function invoiceTotal(invoices) {
+//   let total = 0
+//   let i
+//
+//   for (i = 0; i < invoices.length; i += 1) {
+//     const invoice = invoices[i]
+//     console.log(invoice)
+//     console.log(invoice.total)
+//     total += invoices[i].total()
+//   }
+//
+//   return total
+// }
+//
+// let invoices = []
+// invoices.push(createInvoice())
+// invoices.push(
+//   createInvoice({
+//     internet: 6500,
+//   })
+// )
+//
+// invoices.push(
+//   createInvoice({
+//     phone: 2000,
+//   })
+// )
+//
+// invoices.push(
+//   createInvoice({
+//     phone: 1000,
+//     internet: 4500,
+//   })
+// )
+//
+// console.log(invoiceTotal(invoices)) // => 31000
 
 // Now let's build a factory function to create payments. The function can take
 // an object argument in one of 3 forms:
 
-  // Payment for one service, such as: {internet: 1000} or {phone: 1000}
-  // Payment for both services, such as: {internet: 2000, phone: 1000}.
-  // Payment with just an amount property, such as: {amount: 2000}.
+// Payment for one service, such as: {internet: 1000} or {phone: 1000}
+// Payment for both services, such as: {internet: 2000, phone: 1000}.
+// Payment with just an amount property, such as: {amount: 2000}.
 
 // and should return an object that has paid services, and a total method that
 // returns the payment total. If the amount property is not present, this
@@ -119,38 +120,113 @@ console.log(invoiceTotal(invoices)) // => 31000
 
 // Your code should work with the following:
 
-function createPayment(services) {
+function createPayment(services = {}) {
   // implement the factory function here
+  if (services.amount) {
+    const { amount } = services
+    return {
+      amount,
+      total() {
+        return this.amount
+      },
+    }
+  } else {
+    const { internet, phone } = services
+    return {
+      internet: internet ?? 0,
+      phone: phone ?? 0,
+      total() {
+        return this.internet + this.phone
+      },
+    }
+  }
 }
 
 function paymentTotal(payments) {
-  let total = 0;
-  let i;
+  let total = 0
+  let i
 
   for (i = 0; i < payments.length; i += 1) {
-    total += payments[i].total();
+    total += payments[i].total()
   }
 
-  return total;
+  return total
 }
 
-let payments = [];
-payments.push(createPayment());
-payments.push(createPayment({
-  internet: 6500,
-}));
+let payments = []
+payments.push(createPayment())
+payments.push(
+  createPayment({
+    internet: 6500,
+  })
+)
 
-payments.push(createPayment({
-  phone: 2000,
-}));
+payments.push(
+  createPayment({
+    phone: 2000,
+  })
+)
 
-payments.push(createPayment({
+payments.push(
+  createPayment({
+    phone: 1000,
+    internet: 4500,
+  })
+)
+
+payments.push(
+  createPayment({
+    amount: 10000,
+  })
+)
+
+console.log(paymentTotal(payments)) // => 24000
+
+// 5. Update your createInvoice function to make it possible to add payment(s)
+// to invoices. Use the code below as a guideline:
+
+function createInvoice(services = {}) {
+  // implement the factory function here
+  return {
+    phone: services.phone || 3500,
+    internet: services.internet || 3000,
+    payments: [],
+    total() {
+      const internet = this.internet || 3000
+      const phone = this.phone || 5500
+      return internet + phone
+    },
+    addPayment(payment) {
+      this.payments.push(createPayment(payment))
+    },
+    addPayments(payments) {
+      payments.forEach((payment) => {
+        this.addPayment(payment)
+      }, this)
+    },
+    amountDue() {
+      const amountOwed = this.total() - paymentTotal(this.payments)
+      console.log(`Amount Owed: `, amountOwed)
+      return amountOwed >= 0 ? amountOwed : 0
+    },
+  }
+}
+
+let invoice = createInvoice({
+  phone: 1200,
+  internet: 4000,
+})
+let payment1 = createPayment({
+  amount: 2000,
+})
+let payment2 = createPayment({
   phone: 1000,
-  internet: 4500,
-}));
+  internet: 1200,
+})
+let payment3 = createPayment({
+  phone: 1000,
+})
 
-payments.push(createPayment({
-  amount: 10000,
-}));
-
-console.log(paymentTotal(payments));      // => 24000
+invoice.addPayment(payment1)
+invoice.addPayments([payment2, payment3])
+console.log(invoice.amountDue()); // this should return 0
