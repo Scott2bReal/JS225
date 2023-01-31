@@ -204,8 +204,13 @@ function createInvoice(services = {}) {
         this.addPayment(payment)
       }, this)
     },
+    paymentTotal() {
+      return this.payments.reduce((total, payment) => {
+        return total + payment.total()
+      }, 0)
+    },
     amountDue() {
-      const amountOwed = this.total() - paymentTotal(this.payments)
+      const amountOwed = this.total() - this.paymentTotal()
       console.log(`Amount Owed: `, amountOwed)
       return amountOwed >= 0 ? amountOwed : 0
     },
